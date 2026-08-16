@@ -25,7 +25,9 @@ Write-Output '== 即将发布的文件（npm pack --dry-run）=='
 npm pack --dry-run
 
 Write-Output ''
-Write-Output "== 发布 @cindy/taskman@$((Get-Content package.json -Raw | ConvertFrom-Json).version) =="
+$ver = (Get-Content package.json -Raw -Encoding UTF8 | ConvertFrom-Json).version
+Write-Output "== 发布 @cindy/taskman@$ver =="
+Write-Output '（若账号开启了发布 2FA，npm 会提示 Enter one-time password，请输入认证器 6 位验证码）'
 npm publish
 if ($LASTEXITCODE -ne 0) { Write-Error '发布失败，见上方报错（常见：@cindy 作用域已被他人占用 → 需换包名）。' }
 Write-Output '发布成功！'
