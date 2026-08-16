@@ -1,72 +1,56 @@
-# 任务管家 → Cindy 任务秘书 — 状态说明（已固化）
+# Cindy 任务秘书（@mrchenxiangyu/cindy-taskman）
 
-> 2026-08 起，任务管家已固化为 **DSH 正式插件 `@mrchenxiangyu/cindy-taskman`**，改名 **Cindy 任务秘书**。
-> 不再需要重启后手动重载：**开机/启动 DSH 即自动加载，界面默认可见**。
+把「任务管家」固化为 DSH 正式插件：开机自动加载、界面默认可见。按产品管理任务、模板化生成任务目录、任务文件夹即 harness 工作区、日历/甘特图/日志/管理面板、自动监控会话进度并生成日报周报。
 
-## 安装位置
+## 一键安装（npm）
 
-- **源码（本目录，可改）**：`D:\deepseek_workspace\workspace_plugin\taskman-plugin\`
-  - `lib/index.js` — Host 半边（ESM，正式插件格式）
-  - `lib/client.js` — Client 半边（`window.__ModuleLoader__.load` 预构建 bundle）
-  - `package.json` — 含 `dsh.client` 声明（web 扫描进 `window.__DSH_BOOT__`）
-  - `host.js` / `client.js` — 旧动态插件源码（仅历史参考，不再使用）
-- **成品（运行用）**：`C:\Users\19121\.dsh\profiles\node_modules\@cindy\taskman\`
-- **组合行**：`C:\Users\19121\.dsh\profiles\web\cordis.patch.yml`
-  ```yaml
-  - insert:
-      - id: cindy
-        name: '@mrchenxiangyu/cindy-taskman'
-  ```
-- **数据**：`D:\deepseek_workspace\taskman-demo\`（`.taskman/` 全部管理数据，随目录迁移）
+```powershell
+npm i -g pnpm
+dsh plugin --profile web add @mrchenxiangyu/cindy-taskman
+```
 
-## 架构（与动态版的差异）
+重启 DSH 后，侧边栏底部出现「👩‍💼 Cindy」按钮。首次打开面板会引导你**选择一个工作目录**（所有产品/任务文件夹与 `.taskman/` 管理数据都存放在该目录下）；选择一次后会自动记住，之后每次启动自动恢复。
 
-| 能力 | 动态版（harness.*） | 固化版（真实 API） |
-| --- | --- | --- |
-| Client→Host RPC | `host.call(m, a)` 包私有通道 | `TypertRemoteService('cindy')` + `invoke(method, args)`，网关 `cindy/invoke` 端点（SRC/严格描述符，透传 codec，无需生成 manifest） |
-| 模型工具 | `harness.defineTool/registerTool` | `ctx.tools.register(defineTool(...))`，9 个 `cindy_*` 工具 |
-| 会话监控 | `tools/result`、`agent/status` 事件 | 相同事件，直接 `ctx.on` |
-| 定时器 | `ctx.interval/timeout` | 相同（`timer` 注入） |
-| 界面 | 动态 Client 全局（styles/host/slots） | `__ModuleLoader__.load` bundle：`require('react')`、样式自注入 `<style>`、`ctx.remote.$mount` 挂端点后 `ns.invoke` |
-| 插槽 | sidebar.footer.action / shell.overlay / tool.view.cordis / settings.plugin.item | sidebar.footer.action / shell.overlay / settings.plugin.item（cordis_run 卡片入口对正式插件无意义，已去掉） |
+> 本地拷贝安装：克隆本仓库后运行 `install-cindy.ps1`（幂等，无需 npm 发布）。
 
-## 改名
+## 架构
 
-- 界面：侧边栏「👩💼 Cindy」按钮；面板「Cindy · 任务秘书」；设置→插件→「Cindy 任务秘书」卡片
-- 工具：`cindy_overview / cindy_set_root / cindy_create_product / cindy_create_template / cindy_create_task / cindy_progress / cindy_tasks / cindy_daily_summary / cindy_weekly_report`
-- 数据兼容：`.taskman/` 结构不变，指向原目录即完整恢复
+| 能力 | 实现 |
+| --- | --- |
+| Client→Host RPC | `TypertRemoteService('cindy')` + `invoke(method, args)`，网关 `cindy/invoke` 端点（严格描述符 + 透传 codec，免生成 manifest） |
+| 模型工具 | `ctx.tools.register(defineTool(...))`，9 个 `cindy_*` 工具 |
+| 会话监控 | `tools/result`、`agent/status` 事件 → 写入任务日志（10/30 分钟节流） |
+| 日报/周报 | 定时调度 + 手动触发，Markdown 存于 `<根目录>/.taskman/reports/` |
+| 根目录记忆 | 首次由用户选择；选择写入 DSH 用户目录 `cindy-root.json`，重启自动恢复（环境变量 `CINDY_ROOT` 可覆盖） |
+| 界面 | `__ModuleLoader__.load` bundle：侧边栏按钮 + 浮动面板（总览/日历/甘特图/日志/设置）+ 设置页卡片 |
 
-## 修改后如何生效
+## 数据布局（根目录下）
 
-改 `lib/*` 或 `package.json` 后，把 `lib/`、`package.json` 复制到
-`C:\Users\19121\.dsh\profiles\node_modules\@cindy\taskman\`，然后**重启 DSH** 即可
-（clientModules 对插件集变化按重启生效；bundle 内容哈希会在重启后自然更新）。
+```
+<根目录>/
+├── .taskman/
+│   ├── config.json / products.json / templates.json / tasks.json
+│   ├── journal.jsonl      # 追加式活动日志
+│   └── reports/           # YYYY-MM-DD.daily.md、YYYY-Www.weekly.md
+├── <产品名>/
+│   └── <任务名>/          # = harness 工作区（模板化目录 + README.md）
+```
 
-## 自测
+全部为可读 JSON/Markdown，可 git 追踪、可整体迁移目录。
 
-Host 半边已用真实 Cordis Context + 桩服务跑通 8 项断言：
-插件形状 / apply 无异常 / cindy 服务注册（typertRemote 绑定）/ typert.register
-调用 / cindy/invoke 端点 / 9 工具注册 / invoke 分发（get-state、未知方法错误）。
+## 模型工具
 
-## 已知边界（沿用 v1）
+`cindy_overview` / `cindy_set_root` / `cindy_create_product` / `cindy_create_template` / `cindy_create_task` / `cindy_progress` / `cindy_tasks` / `cindy_daily_summary` / `cindy_weekly_report`
+
+## 已知边界
 
 - 删除任务只移除秘书处记录，磁盘目录与工作区保留（数据安全优先）。
 - 报告为确定性结构化撰写，未接 LLM 润色。
 - 产品级自定义阶段为后续增强。
+- 依赖 DSH 自带包（cordis / dsh-typert-protocol / dsh-tools / dsh-client-*），无需额外安装；要求 DSH 版本与开发时一致（rc.6）。
 
-## 换设备（插件可完整迁移；数据不强求通用）
+## 开发
 
-**目标**：插件本体在新设备上「装完即用、功能完整」。数据/工作区按需迁移，不做硬依赖。
-
-1. 新设备安装**同版本 DSH** 并启动过一次 web；
-2. 拷贝本目录（源码）到新设备；
-3. 运行一键安装脚本：
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File <源码路径>\install-cindy.ps1
-   ```
-   （自动：复制 `lib/` + `package.json` 到 profile node_modules、写入 `cordis.patch.yml` 组合行，幂等）
-4. 重启 DSH → 侧边栏出现「Cindy」，**从零数据即可完整使用**（内置模板自动创建，面板建产品/建任务/日报周报、9 个 `cindy_*` 工具全部可用；已用「全新空目录首启」场景端到端验证）。
-
-可选迁移数据：把旧机数据目录（含 `.taskman/`）拷到新机，面板设置根目录 / `cindy_set_root` / 环境变量 `CINDY_ROOT` 三选一，任务工作区自动补注册。
-
-依赖说明：插件只依赖 DSH 自带包（cordis、dsh-typert-protocol、dsh-tools 及 client 侧的 dsh-client-* 模块），**无需额外 npm install**；唯一要求是 DSH 版本与开发时一致（rc.6）。
+- `lib/index.js` — Host 半边；`lib/client.js` — Client 半边（预构建 bundle）
+- 修改后：同步 `lib/` 与 `package.json` 到 profile 的 node_modules 对应包目录 → 重启 DSH
+- 发布：`publish-cindy.ps1`（自动检查登录 → 预览 → `npm publish`，需 2FA 验证码）

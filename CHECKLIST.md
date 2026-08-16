@@ -12,7 +12,7 @@
 - [ ] 打开面板 → 出现初始化引导；「浏览…」或输入路径后「启用」
 - [ ] 目标目录下生成 `.taskman/`（config.json / templates.json + reports/）
 - [ ] 内置模板「通用任务模板」包含 script/data/output/outcome/reference/project 六项
-- [ ] 已自测验证：可指向 `D:\deepseek_workspace\taskman-demo` 直接查看自测数据（产品 B300雷达 / 任务 性能比测 / 两份报告）
+- [ ] 已自测验证：可指向任意含 `.taskman/` 的数据目录直接查看自测数据（产品 B300雷达 / 任务 性能比测 / 两份报告）
 
 ## 2. 产品与模板
 - [ ] 设置页创建产品「B300雷达」→ 根目录出现 `B300雷达/README.md`

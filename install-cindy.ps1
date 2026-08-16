@@ -3,13 +3,13 @@
 # 用法（在新设备上，先安装并启动过一次 DSH web 后执行）：
 #   powershell -ExecutionPolicy Bypass -File install-cindy.ps1
 # 可选参数：
-#   -Source      插件源码目录（默认 D:\deepseek_workspace\workspace_plugin\taskman-plugin）
+#   -Source      插件源码目录（默认本脚本所在目录）
 #   -ProfileRoot DSH 用户 profile 目录（默认 $env:USERPROFILE\.dsh\profiles\web）
 # 说明：把插件包复制进 profile 的 node_modules，并在 cordis.patch.yml 写入组合行；
-#       重启 DSH 后 Cindy 自动加载。数据目录需另行拷贝（见最后提示）。
+#       重启 DSH 后 Cindy 自动加载。首次打开面板自选工作目录。
 # =====================================================================
 param(
-  [string]$Source = 'D:\deepseek_workspace\workspace_plugin\taskman-plugin',
+  [string]$Source = $PSScriptRoot,
   [string]$ProfileRoot = "$env:USERPROFILE\.dsh\profiles\web"
 )
 $ErrorActionPreference = 'Stop'
