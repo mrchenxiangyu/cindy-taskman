@@ -7,7 +7,7 @@
 #       发布成功后，新设备可 `dsh plugin --profile web add @cindy/taskman`。
 # =====================================================================
 $ErrorActionPreference = 'Stop'
-$root = Split-Path $PSScriptRoot -Parent
+$root = $PSScriptRoot
 Set-Location $root
 
 Write-Output '== 检查 npm 登录状态 =='
