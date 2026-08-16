@@ -1,0 +1,15 @@
+# Node
+node_modules/
+npm-debug.log*
+*.tgz
+*.log
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+
+# 本地临时
+.tmp/
