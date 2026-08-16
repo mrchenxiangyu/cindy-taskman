@@ -1,6 +1,6 @@
-# @cindy/taskman bundle patch —— 随包分发，供 `dsh plugin add @cindy/taskman` 自动挂载。
+# @mrchenxiangyu/cindy-taskman bundle patch —— 随包分发，供 `dsh plugin add @mrchenxiangyu/cindy-taskman` 自动挂载。
 # 注意：本机 profile 的 cordis.patch.yml 已含同一行（本地直装路径）；
 #       用 `dsh plugin add` 安装的机器不要再重复写 profile 行，避免 id 重复。
 - insert:
     - id: cindy
-      name: '@cindy/taskman'
+      name: '@mrchenxiangyu/cindy-taskman'

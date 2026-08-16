@@ -26,15 +26,15 @@ Write-Output "[1/2] 插件包已安装到 $dest"
 
 $patch = Join-Path $ProfileRoot 'cordis.patch.yml'
 $raw = [System.IO.File]::ReadAllText($patch)
-$block = "# ── Cindy 任务秘书（@cindy/taskman）────────────────────────" + [Environment]::NewLine +
+$block = "# ── Cindy 任务秘书（@mrchenxiangyu/cindy-taskman）────────────────────────" + [Environment]::NewLine +
          "- insert:" + [Environment]::NewLine +
          "    - id: cindy" + [Environment]::NewLine +
-         "      name: '@cindy/taskman'" + [Environment]::NewLine
+         "      name: '@mrchenxiangyu/cindy-taskman'" + [Environment]::NewLine
 if ($raw -match "^\s*\[\s*\]\s*$") {
   # 默认空补丁文件：整体替换
   [System.IO.File]::WriteAllText($patch, $block, (New-Object System.Text.UTF8Encoding($true)))
   Write-Output "[2/2] 已写入组合补丁：$patch"
-} elseif ($raw -match "name:\s*'@cindy/taskman'") {
+} elseif ($raw -match "name:\s*'@mrchenxiangyu/cindy-taskman'") {
   Write-Output "[2/2] 组合补丁已包含 Cindy，跳过：$patch"
 } else {
   [System.IO.File]::AppendAllText($patch, [Environment]::NewLine + $block, (New-Object System.Text.UTF8Encoding($true)))

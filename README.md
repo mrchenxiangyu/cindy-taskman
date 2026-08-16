@@ -1,6 +1,6 @@
 # 任务管家 → Cindy 任务秘书 — 状态说明（已固化）
 
-> 2026-08 起，任务管家已固化为 **DSH 正式插件 `@cindy/taskman`**，改名 **Cindy 任务秘书**。
+> 2026-08 起，任务管家已固化为 **DSH 正式插件 `@mrchenxiangyu/cindy-taskman`**，改名 **Cindy 任务秘书**。
 > 不再需要重启后手动重载：**开机/启动 DSH 即自动加载，界面默认可见**。
 
 ## 安装位置
@@ -15,7 +15,7 @@
   ```yaml
   - insert:
       - id: cindy
-        name: '@cindy/taskman'
+        name: '@mrchenxiangyu/cindy-taskman'
   ```
 - **数据**：`D:\deepseek_workspace\taskman-demo\`（`.taskman/` 全部管理数据，随目录迁移）
 
