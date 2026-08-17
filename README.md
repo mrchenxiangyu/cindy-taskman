@@ -2,16 +2,39 @@
 
 把「任务管家」固化为 DSH 正式插件：开机自动加载、界面默认可见。按产品管理任务、模板化生成任务目录、任务文件夹即 harness 工作区、日历/甘特图/日志/管理面板、自动监控会话进度并生成日报周报。v0.2.0 起新增**会议记录与行动项跟踪**、**专业日报/周报（Markdown + HTML 美化版）**。
 
-## 一键安装（npm）
+## 安装
+
+### 前提
+
+- Windows + Node.js 18+（自带 npm）
+- 已安装并**启动过一次** DeepSeek Harness（默认 profile 名为 `web`，即存在 `~/.dsh/profiles/web/`）
+
+### 方式 A：从 npm 安装（推荐）
 
 ```powershell
 npm i -g pnpm
 dsh plugin --profile web add @mrchenxiangyu/cindy-taskman
 ```
 
-重启 DSH 后，侧边栏底部出现「👩‍💼 Cindy」按钮。首次打开面板会引导你**选择一个工作目录**（所有产品/任务文件夹与 `.taskman/` 管理数据都存放在该目录下）；选择一次后会自动记住，之后每次启动自动恢复。
+> - 安装的是 npm 上最新发布版本（当前 0.1.0，0.2.0 已推送到 GitHub、待发布 npm）。
+> - 若 `dsh` 命令不在 PATH：改用 `node "<DSH安装目录>\profiles\node_modules\@deepseek-ai\dsh\lib\bin.js" plugin --profile web add @mrchenxiangyu/cindy-taskman`。
+> - profile 名不是 `web` 时，把 `web` 换成你的 profile（`dsh plugin --profile <名字> add ...`）。
 
-> 本地拷贝安装：克隆本仓库后运行 `install-cindy.ps1`（幂等，无需 npm 发布）。
+### 方式 B：从 GitHub 源码安装（无需 npm 发布，始终最新）
+
+```powershell
+git clone https://github.com/mrchenxiangyu/cindy-taskman.git
+cd cindy-taskman
+powershell -ExecutionPolicy Bypass -File install-cindy.ps1
+```
+
+> `install-cindy.ps1` 把插件源码直接复制进 profile 的 node_modules（`@mrchenxiangyu/cindy-taskman`）并写入
+> `cordis.patch.yml` 组合行；幂等可重复运行；自动兼容两种 node_modules 布局（`profiles\node_modules` / `profiles\web\node_modules`），
+> 并清理旧包名 `@cindy/taskman` 的遗留目录。纯 ASCII 脚本，任意语言系统均可用。
+
+### 装完后
+
+**重启 DSH**，侧边栏底部出现「👩‍💼 Cindy」按钮。首次打开面板会引导你**选择一个工作目录**（所有产品/任务文件夹与 `.taskman/` 管理数据都存放在该目录下）；选择一次后会自动记住，之后每次启动自动恢复。
 
 ## 架构
 

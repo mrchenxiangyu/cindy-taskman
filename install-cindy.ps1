@@ -1,12 +1,12 @@
-﻿# =====================================================================
-# Cindy 任务秘书 —— 新设备一键安装脚本
-# 用法（在新设备上，先安装并启动过一次 DSH web 后执行）：
+# =====================================================================
+# Cindy Task Secretary - one-click install for new machines
+# Usage (after DSH web installed & started once):
 #   powershell -ExecutionPolicy Bypass -File install-cindy.ps1
-# 可选参数：
-#   -Source      插件源码目录（默认本脚本所在目录）
-#   -ProfileRoot DSH 用户 profile 目录（默认 $env:USERPROFILE\.dsh\profiles\web）
-# 说明：把插件包复制进 profile 的 node_modules，并在 cordis.patch.yml 写入组合行；
-#       重启 DSH 后 Cindy 自动加载。首次打开面板自选工作目录。
+# Options:
+#   -Source       plugin source dir (default: this script's dir)
+#   -ProfileRoot  DSH profile dir (default: $env:USERPROFILE\.dsh\profiles\web)
+# Copies the plugin package into the profile's node_modules and appends
+# the cordis.patch.yml insert block. Restart DSH to load Cindy.
 # =====================================================================
 param(
   [string]$Source = $PSScriptRoot,
@@ -14,34 +14,48 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
-if (-not (Test-Path (Join-Path $Source 'package.json'))) { throw "找不到插件源码：$Source" }
-if (-not (Test-Path (Join-Path $ProfileRoot 'cordis.yml'))) { throw "找不到 DSH profile（未启动过 web？）：$ProfileRoot" }
+if (-not (Test-Path (Join-Path $Source 'package.json'))) { throw "plugin source not found: $Source" }
+if (-not (Test-Path (Join-Path $ProfileRoot 'cordis.yml'))) { throw "DSH profile not found (start web once first): $ProfileRoot" }
 
+# package name MUST match package.json "name"
+$pkgName = '@mrchenxiangyu/cindy-taskman'
+# node_modules: prefer sibling shared dir (profiles\node_modules), else profile-local (profiles\web\node_modules)
 $nm = Join-Path (Split-Path $ProfileRoot -Parent) 'node_modules'
-$dest = Join-Path $nm '@cindy\taskman'
+if (-not (Test-Path $nm)) { $nm = Join-Path $ProfileRoot 'node_modules' }
+if (-not (Test-Path $nm)) { throw "node_modules not found: $nm (install & start DSH once first)" }
+$dest = Join-Path $nm $pkgName
+
+# clean up legacy dir from the old package name (@cindy/taskman)
+$oldDest = Join-Path $nm '@cindy\taskman'
+if (Test-Path $oldDest) {
+  Remove-Item $oldDest -Recurse -Force
+  Write-Output "[migrate] removed legacy dir: $oldDest"
+}
+
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 Copy-Item (Join-Path $Source 'package.json') $dest -Force
 Copy-Item (Join-Path $Source 'lib') (Join-Path $dest 'lib') -Recurse -Force
-Write-Output "[1/2] 插件包已安装到 $dest"
+Write-Output "[1/2] plugin package installed to $dest"
 
 $patch = Join-Path $ProfileRoot 'cordis.patch.yml'
 $raw = [System.IO.File]::ReadAllText($patch)
-$block = "# ── Cindy 任务秘书（@mrchenxiangyu/cindy-taskman）────────────────────────" + [Environment]::NewLine +
+$block = "# -- Cindy Task Secretary (@mrchenxiangyu/cindy-taskman) ------------------" + [Environment]::NewLine +
          "- insert:" + [Environment]::NewLine +
          "    - id: cindy" + [Environment]::NewLine +
          "      name: '@mrchenxiangyu/cindy-taskman'" + [Environment]::NewLine
 if ($raw -match "^\s*\[\s*\]\s*$") {
-  # 默认空补丁文件：整体替换
+  # empty patch file: replace whole content
   [System.IO.File]::WriteAllText($patch, $block, (New-Object System.Text.UTF8Encoding($true)))
-  Write-Output "[2/2] 已写入组合补丁：$patch"
+  Write-Output "[2/2] patch written: $patch"
 } elseif ($raw -match "name:\s*'@mrchenxiangyu/cindy-taskman'") {
-  Write-Output "[2/2] 组合补丁已包含 Cindy，跳过：$patch"
+  Write-Output "[2/2] patch already contains Cindy, skipped: $patch"
 } else {
   [System.IO.File]::AppendAllText($patch, [Environment]::NewLine + $block, (New-Object System.Text.UTF8Encoding($true)))
-  Write-Output "[2/2] 已追加组合补丁：$patch"
+  Write-Output "[2/2] patch appended: $patch"
 }
 
 Write-Output ''
-Write-Output '重启 DSH 后生效（Ctrl+C 后重跑 dsh web）。'
-Write-Output '数据迁移：把原机器的数据目录（含 .taskman/）拷到本机，然后在面板「设置」填入根目录，'
-Write-Output '或用 cindy_set_root 工具 / 环境变量 CINDY_ROOT 指定 —— 任务工作区会自动补注册，无需手工处理。'
+Write-Output 'Restart DSH to apply (Ctrl+C then re-run dsh web).'
+Write-Output 'Data migration: copy the old data dir (with .taskman/) to this machine,'
+Write-Output 'then set the root dir via panel Settings / cindy_set_root / env CINDY_ROOT.'
+Write-Output 'Task workspaces re-register automatically.'
