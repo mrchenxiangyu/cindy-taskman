@@ -6,21 +6,10 @@
 
 ### 前提
 
-- Windows + Node.js 18+（自带 npm）
+- Windows + Node.js 18+（自带 npm，仅 npm 方式需要）
 - 已安装并**启动过一次** DeepSeek Harness（默认 profile 名为 `web`，即存在 `~/.dsh/profiles/web/`）
 
-### 方式 A：从 npm 安装（推荐）
-
-```powershell
-npm i -g pnpm
-dsh plugin --profile web add @mrchenxiangyu/cindy-taskman
-```
-
-> - 安装的是 npm 上最新发布版本（当前 0.1.0，0.2.0 已推送到 GitHub、待发布 npm）。
-> - 若 `dsh` 命令不在 PATH：改用 `node "<DSH安装目录>\profiles\node_modules\@deepseek-ai\dsh\lib\bin.js" plugin --profile web add @mrchenxiangyu/cindy-taskman`。
-> - profile 名不是 `web` 时，把 `web` 换成你的 profile（`dsh plugin --profile <名字> add ...`）。
-
-### 方式 B：从 GitHub 源码安装（无需 npm 发布，始终最新）
+### 方式 A：从 GitHub 源码安装（推荐，无需 npm 账号，始终最新）
 
 ```powershell
 git clone https://github.com/mrchenxiangyu/cindy-taskman.git
@@ -28,9 +17,20 @@ cd cindy-taskman
 powershell -ExecutionPolicy Bypass -File install-cindy.ps1
 ```
 
-> `install-cindy.ps1` 把插件源码直接复制进 profile 的 node_modules（`@mrchenxiangyu/cindy-taskman`）并写入
-> `cordis.patch.yml` 组合行；幂等可重复运行；自动兼容两种 node_modules 布局（`profiles\node_modules` / `profiles\web\node_modules`），
-> 并清理旧包名 `@cindy/taskman` 的遗留目录。纯 ASCII 脚本，任意语言系统均可用。
+> - 没有 git 也可以：下载 zip 包 <https://github.com/mrchenxiangyu/cindy-taskman/archive/refs/heads/main.zip>，解压后进入目录运行 `install-cindy.ps1`。
+> - `install-cindy.ps1` 把插件源码直接复制进 profile 的 node_modules（`@mrchenxiangyu/cindy-taskman`）并写入 `cordis.patch.yml` 组合行；幂等可重复运行；自动兼容两种 node_modules 布局（`profiles\node_modules` / `profiles\web\node_modules`），并清理旧包名 `@cindy/taskman` 的遗留目录。纯 ASCII 脚本，任意语言系统均可用。
+
+### 方式 B：从 npm 安装（可选）
+
+```powershell
+npm i -g pnpm
+dsh plugin --profile web add @mrchenxiangyu/cindy-taskman
+```
+
+> - 需要 npm 账号登录；安装的是 npm 上最新发布版本（目前为 0.1.0 旧版，0.2.0 仅在 GitHub）。
+> - 若 `dsh` 命令不在 PATH：改用 `node "<DSH安装目录>\profiles\node_modules\@deepseek-ai\dsh\lib\bin.js" plugin --profile web add @mrchenxiangyu/cindy-taskman`。
+> - profile 名不是 `web` 时，把 `web` 换成你的 profile（`dsh plugin --profile <名字> add ...`）。
+> - **想要最新功能（会议记录、HTML 报告等）请用方式 A。**
 
 ### 装完后
 
