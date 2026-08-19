@@ -1,6 +1,6 @@
 {
     "name":  "@mrchenxiangyu/cindy-taskman",
-    "version":  "0.2.1",
+    "version": "0.2.2",
     "description":  "Cindy 任务秘书：把任务管家固化为 DSH 正式插件，开机自动加载、界面默认可见。按产品管理任务、模板化生成任务目录、任务文件夹即 harness 工作区、日历/甘特图/日志/管理面板、自动监控会话进度并生成日报周报。",
     "private":  false,
     "publishConfig":  {
